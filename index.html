@@ -413,6 +413,17 @@
           </ul>
         </section>
 
+        <section aria-labelledby="notify-title">
+          <div class="section-head"><h2 id="notify-title">Show Notifications</h2><div class="rule" aria-hidden="true"></div></div>
+          <div class="card"><div class="pad">
+            <p>Get a notification for show reminders, ticket news, and CAST announcements. Only a few a year — never spam.</p>
+            <p id="notify-status"></p>
+            <div class="btn-row">
+              <button class="btn btn-red" type="button" id="notify-btn">Turn on notifications</button>
+            </div>
+          </div></div>
+        </section>
+
         <section aria-labelledby="patron-teaser-title">
           <div class="section-head"><h2 id="patron-teaser-title">Become a Patron</h2><div class="rule" aria-hidden="true"></div></div>
           <div class="card"><div class="pad">
@@ -955,6 +966,157 @@
           document.addEventListener("touchcancel", endPull, { passive: true });
         })();
       })();
+    </script>
+    <script>
+    /* CAST push notifications — separate from the app's own script above.
+       Everything here is guarded: if push is unsupported, Firebase fails to
+       load, or anything throws, the app above keeps working untouched.
+       Firebase SDK loads only when someone taps the button (or on load for a
+       returning subscriber), so normal app loads fetch nothing extra. */
+    (function () {
+      var BACKEND = 'https://script.google.com/macros/s/AKfycbzE5boEXMNb8W8kINlAKC6k0rmIcDG7lo_UBjOJ-caXyEVjJfVPSi2Sy9P8QgXeXW9w/exec';
+      var VAPID_KEY = 'BA5LShYN-i43TBbx6RUvS_nLgNXzB2M9IOwl1AWw7-m3FT5fQY83XgX3QghgEFndjXeb_N2I_GMY3r0GptP9YDM';
+      var FIREBASE_CONFIG = {
+        apiKey: 'AIzaSyAWbAf7bBxzK3Ia-S0JWmzlYO0Cjl3v0IE',
+        authDomain: 'cast-push-notifications.firebaseapp.com',
+        projectId: 'cast-push-notifications',
+        storageBucket: 'cast-push-notifications.firebasestorage.app',
+        messagingSenderId: '792715196736',
+        appId: '1:792715196736:web:14bc2511196340727162a5'
+      };
+      var btn = document.getElementById('notify-btn');
+      var statusEl = document.getElementById('notify-status');
+      if (!btn || !statusEl) return;
+      function setStatus(msg) { statusEl.textContent = msg; }
+      function setBtn(label, disabled) { btn.textContent = label; btn.disabled = !!disabled; }
+      function showMessage(payload) {
+        var n = (payload && payload.notification) || {};
+        setStatus('New from CAST: ' + (n.title || '') + (n.body ? ' \u2014 ' + n.body : ''));
+      }
+      function supported() {
+        return ('serviceWorker' in navigator) && ('PushManager' in window) &&
+          ('Notification' in window) && ('ServiceWorkerRegistration' in window) &&
+          ('showNotification' in ServiceWorkerRegistration.prototype);
+      }
+      if (!supported()) {
+        btn.style.display = 'none';
+        setStatus('Notifications are not available in this browser.');
+        return;
+      }
+      if (window.location.hostname !== 'app.baycitycast.com') {
+        btn.style.display = 'none';
+        setStatus('Notifications work from app.baycitycast.com — open the app there to turn them on.');
+        return;
+      }
+      if (Notification.permission === 'denied') {
+        setBtn('Notifications off', true);
+        setStatus('Notifications are blocked for this site. To turn them on, allow notifications for app.baycitycast.com in your browser settings.');
+        return;
+      }
+      function loadScript(src) {
+        return new Promise(function (resolve, reject) {
+          var s = document.createElement('script');
+          s.src = src;
+          s.onload = resolve;
+          s.onerror = function () { reject(new Error('failed to load ' + src)); };
+          document.head.appendChild(s);
+        });
+      }
+      function apiCall(url) {
+        return fetch(url, { credentials: 'omit' }).then(function (r) { return r.json(); }).catch(function () {
+          return new Promise(function (resolve, reject) {
+            var cb = 'castPushCb' + Date.now();
+            window[cb] = function (d) { delete window[cb]; resolve(d); };
+            var s = document.createElement('script');
+            s.src = url + (url.indexOf('?') === -1 ? '?' : '&') + 'callback=' + cb;
+            s.onerror = function () { delete window[cb]; reject(new Error('backend unreachable')); };
+            document.head.appendChild(s);
+          });
+        });
+      }
+      var messaging_ = null;
+      var token_ = null;
+      function initFirebase() {
+        if (window.firebase && firebase.messaging) return Promise.resolve();
+        return loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js')
+          .then(function () { return loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js'); })
+          .then(function () {
+            if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+          });
+      }
+      function wireOnState() {
+        setBtn('Turn off notifications', false);
+        setStatus('Notifications are on for this device.');
+        btn.onclick = turnOff;
+        if (messaging_) messaging_.onMessage(showMessage);
+      }
+      function turnOn() {
+        setBtn('Setting up\u2026', true);
+        setStatus('');
+        initFirebase()
+          .then(function () { return navigator.serviceWorker.register('/firebase-messaging-sw.js'); })
+          .then(function () {
+            messaging_ = firebase.messaging();
+            return Notification.requestPermission();
+          })
+          .then(function (perm) {
+            if (perm !== 'granted') throw new Error('not-granted');
+            return messaging_.getToken({ vapidKey: VAPID_KEY });
+          })
+          .then(function (token) {
+            token_ = token;
+            return apiCall(BACKEND + '?action=register&token=' + encodeURIComponent(token));
+          })
+          .then(function (res) {
+            if (!res || !res.ok) throw new Error('register failed');
+            wireOnState();
+          })
+          .catch(function (err) {
+            setBtn('Turn on notifications', false);
+            if (err && err.message === 'not-granted') {
+              setStatus('No problem \u2014 notifications stay off. You can turn them on any time from this card.');
+            } else {
+              setStatus('Something went wrong setting that up. Please try again later.');
+            }
+          });
+      }
+      function turnOff() {
+        setBtn('Turning off\u2026', true);
+        var done = function () {
+          token_ = null;
+          setBtn('Turn on notifications', false);
+          setStatus('Notifications are off.');
+          btn.onclick = turnOn;
+        };
+        var p = Promise.resolve();
+        if (token_ && messaging_) {
+          p = messaging_.deleteToken().catch(function () {})
+            .then(function () { return apiCall(BACKEND + '?action=unregister&token=' + encodeURIComponent(token_)); })
+            .catch(function () {});
+        }
+        p.then(done);
+      }
+      if (Notification.permission === 'granted') {
+        setBtn('Checking\u2026', true);
+        initFirebase()
+          .then(function () { return navigator.serviceWorker.register('/firebase-messaging-sw.js'); })
+          .then(function () {
+            messaging_ = firebase.messaging();
+            return messaging_.getToken({ vapidKey: VAPID_KEY });
+          })
+          .then(function (token) {
+            token_ = token;
+            return apiCall(BACKEND + '?action=register&token=' + encodeURIComponent(token));
+          })
+          .then(function () { wireOnState(); })
+          .catch(function () {
+            setBtn('Turn on notifications', false);
+            btn.onclick = turnOn;
+          });
+      } else {
+        btn.onclick = turnOn;
+      }
+    })();
     </script>
   </body>
 </html>
