@@ -21,12 +21,16 @@ firebase.initializeApp({
 var messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function (payload) {
+  // Data-only messages (see Code.gs): the title/body arrive in payload.data.
+  // The notification fallback is only for safety if an old-style message
+  // ever arrives — reading both would show the banner twice.
+  var d = payload.data || {};
   var n = payload.notification || {};
-  var title = n.title || 'Bay City CAST';
+  var title = d.title || n.title || 'Bay City CAST';
   var options = {
-    body: n.body || '',
+    body: d.body || n.body || '',
     data: {
-      url: (payload.fcmOptions && payload.fcmOptions.link) ||
+      url: d.link || (payload.fcmOptions && payload.fcmOptions.link) ||
         'https://app.baycitycast.com/'
     }
   };

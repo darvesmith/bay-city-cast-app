@@ -990,8 +990,11 @@
       function setStatus(msg) { statusEl.textContent = msg; }
       function setBtn(label, disabled) { btn.textContent = label; btn.disabled = !!disabled; }
       function showMessage(payload) {
+        var d = (payload && payload.data) || {};
         var n = (payload && payload.notification) || {};
-        setStatus('New from CAST: ' + (n.title || '') + (n.body ? ' \u2014 ' + n.body : ''));
+        var title = d.title || n.title || '';
+        var body = d.body || n.body || '';
+        setStatus('New from CAST: ' + title + (body ? ' \u2014 ' + body : ''));
       }
       function supported() {
         return ('serviceWorker' in navigator) && ('PushManager' in window) &&
