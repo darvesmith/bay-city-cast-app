@@ -354,6 +354,21 @@
         .view.active { animation: rise 0.28s ease-out; }
         @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
       }
+      /* ---------- Encore chat (Chat tab) ---------- */
+      .encore-banner { width: 100%; height: 150px; object-fit: cover; display: block; border-radius: 10px; }
+      .encore-chat { display: flex; flex-direction: column; height: min(560px, 70vh); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); margin-top: 14px; }
+      .encore-messages { flex: 1; overflow-y: auto; padding: 12px 14px; }
+      .encore-msg { margin: 8px 0; }
+      .encore-msg span { display: inline-block; max-width: 85%; padding: 9px 13px; border-radius: 15px; line-height: 1.4; }
+      .encore-user { text-align: right; }
+      .encore-user span { background: var(--red); color: var(--red-ink); }
+      .encore-bot span { background: var(--surface-2); color: var(--ink); }
+      .encore-input-row { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); background: var(--surface); flex-shrink: 0; }
+      .encore-input-row input { flex: 1; min-width: 0; padding: 11px 14px; border: 1px solid var(--line); border-radius: 20px; outline: none; font: inherit; font-size: 1rem; background: #fff; color: var(--ink); }
+      .encore-input-row input:focus { border-color: var(--gold-bright); }
+      .encore-send { background: var(--red); color: var(--red-ink); border: none; border-radius: 20px; padding: 11px 20px; font: inherit; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+      .encore-send:hover { background: var(--red-dark); }
+      .encore-note { margin-top: 12px; font-size: 0.95rem; color: var(--ink-soft); }
     </style>
   </head>
   <body>
@@ -740,6 +755,26 @@
         </section>
       </main>
 
+      <main class="view" id="view-chat" tabindex="-1" aria-label="Chat with CAST">
+        <section aria-labelledby="chat-title" style="margin-top:14px">
+          <div class="section-head"><h2 id="chat-title">Chat with CAST</h2><div class="rule" aria-hidden="true"></div></div>
+          <div class="card"><div class="pad">
+            <img class="encore-banner" src="https://drive.google.com/thumbnail?id=1KMrxKxDNoRkiTStFKfnz_ha097Ve4ygo&amp;sz=w800" alt="Encore, the CAST Chat Bot">
+            <p style="margin-top:12px">Ask Encore about our shows, tickets, volunteering, and more — it answers straight from CAST's website and info pages.</p>
+            <div class="encore-chat" id="encore-chat">
+              <div class="encore-messages" id="encore-messages">
+                <div class="encore-msg encore-bot"><span>Howdy Howdy! I'm Encore, the CAST Chat Bot. Ask me anything about Bay City CAST — our shows, tickets, volunteering, and more.</span></div>
+              </div>
+              <div class="encore-input-row">
+                <input type="text" id="encore-input" placeholder="Type your question here..." autocomplete="off" aria-label="Type your question for Encore">
+                <button type="button" class="encore-send" id="encore-send">Send</button>
+              </div>
+            </div>
+            <p class="encore-note">Encore answers from CAST's website and info pages. If it can't help, email <a href="mailto:info@baycitycast.com">info@baycitycast.com</a>.</p>
+          </div></div>
+        </section>
+      </main>
+
       <footer class="colophon">
         <p>Bay City CAST · 920 Nichols Avenue, Bay City, Texas</p>
         <p>Community theatre, run by volunteers, for Matagorda County.</p>
@@ -768,6 +803,9 @@
         <button type="button" role="tab" data-tab="visit" aria-selected="false" aria-controls="view-visit">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
           Visit</button>
+        <button type="button" role="tab" data-tab="chat" aria-selected="false" aria-controls="view-chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          Chat</button>
       </div>
       <div class="tabbar-spacer">
         <a class="site-pill" href="https://www.baycitycast.com" target="_blank" rel="noopener" aria-label="Visit the CAST website at BayCityCAST.com">
@@ -1133,6 +1171,69 @@
         btn.onclick = turnOn;
       }
     })();
+    </script>
+
+    <script>
+      /* ---------- Encore chat (Chat tab) ----------
+         Calls the Encore backend directly: GET the Apps Script web app
+         exec URL with ?question=<url-encoded question>. Plain fetch with
+         credentials 'omit' (same pattern as the CAST volunteer forms), so
+         it works no matter how many Google accounts are signed in.
+         NOTE: the backend only answers ?question= once the local doGet
+         change in ~/workspace/cast-chat/Code.gs is deployed as a NEW
+         VERSION of the existing deployment (same exec URL). Until then
+         every question lands on the friendly error message below. */
+      (function () {
+        "use strict";
+        var ENCORE_API_URL = "https://script.google.com/macros/s/AKfycbwCna2Nj48khmNcTOAZ7ZnuKezcLHD8wUvAjI-Yz8xXYhQzCR4cLVtHSZn-c4M8RDa3oA/exec";
+        var ENCORE_ERROR = "Encore is taking a break \u2014 email info@baycitycast.com and we'll get back to you.";
+        var box = document.getElementById("encore-messages");
+        var input = document.getElementById("encore-input");
+        var sendBtn = document.getElementById("encore-send");
+        if (!box || !input || !sendBtn) return;
+        function addMsg(text, who) {
+          var div = document.createElement("div");
+          div.className = "encore-msg encore-" + who;
+          var span = document.createElement("span");
+          span.textContent = text;
+          div.appendChild(span);
+          box.appendChild(div);
+          box.scrollTop = box.scrollHeight;
+        }
+        function addLoading() {
+          var div = document.createElement("div");
+          div.className = "encore-msg encore-bot";
+          div.id = "encore-loading";
+          var span = document.createElement("span");
+          span.textContent = "Thinking...";
+          div.appendChild(span);
+          box.appendChild(div);
+          box.scrollTop = box.scrollHeight;
+        }
+        function removeLoading() {
+          var el = document.getElementById("encore-loading");
+          if (el) el.remove();
+        }
+        async function sendEncoreMessage() {
+          var question = input.value.trim();
+          if (!question) return;
+          addMsg(question, "user");
+          input.value = "";
+          addLoading();
+          try {
+            var res = await fetch(ENCORE_API_URL + "?question=" + encodeURIComponent(question), { credentials: "omit" });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            var data = await res.json();
+            removeLoading();
+            addMsg((data && data.answer) ? data.answer : ENCORE_ERROR, "bot");
+          } catch (err) {
+            removeLoading();
+            addMsg(ENCORE_ERROR, "bot");
+          }
+        }
+        sendBtn.addEventListener("click", sendEncoreMessage);
+        input.addEventListener("keydown", function (e) { if (e.key === "Enter") sendEncoreMessage(); });
+      })();
     </script>
   </body>
 </html>
