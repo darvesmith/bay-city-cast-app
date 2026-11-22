@@ -995,6 +995,19 @@
         var title = d.title || n.title || '';
         var body = d.body || n.body || '';
         setStatus('New from CAST: ' + title + (body ? ' \u2014 ' + body : ''));
+        // Pop a real system banner too, so someone on another page of the
+        // app still sees it. Only the visible tab does this, so a message
+        // never banners twice; when the app is closed the service worker
+        // shows the banner instead.
+        if (document.visibilityState === 'visible' && title &&
+            'serviceWorker' in navigator) {
+          navigator.serviceWorker.ready.then(function (reg) {
+            return reg.showNotification(title, {
+              body: body,
+              data: { url: d.link || n.link || 'https://app.baycitycast.com/' }
+            });
+          }).catch(function () {});
+        }
       }
       function supported() {
         return ('serviceWorker' in navigator) && ('PushManager' in window) &&
