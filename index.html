@@ -329,9 +329,6 @@
       #sent-note { display: none; border-color: var(--good); }
       #sent-note.show { display: block; }
       #sent-note strong { color: var(--good); }
-      #ml-sent-note { display: none; border-color: var(--good); }
-      #ml-sent-note.show { display: block; }
-      #ml-sent-note strong { color: var(--good); }
 
       /* ---------- Support ways ---------- */
       .support-ways { list-style: none; margin: 0 0 4px; padding: 0; display: grid; gap: 10px; }
@@ -478,29 +475,6 @@
               <a class="btn btn-red" href="https://season-volunteer.baycitycast.com/" target="_blank" rel="noopener">Sign Up to Volunteer</a>
             </div>
           </div></div>
-        </section>
-
-        <section aria-labelledby="mailing-title">
-          <div class="section-head"><h2 id="mailing-title">Join Our Mailing List</h2><div class="rule" aria-hidden="true"></div></div>
-          <div class="card"><div class="pad">
-            <p>Get show announcements, audition notices, and CAST news by email — a few messages around each production, never spam. Fill this in and your email app opens with your signup ready to send.</p>
-            <form id="ml-form" novalidate>
-              <div class="field" id="f-ml-name">
-                <label for="ml-name">Your name</label>
-                <input id="ml-name" name="ml-name" type="text" autocomplete="name" required />
-                <p class="err-msg">Please enter your name.</p>
-              </div>
-              <div class="field" id="f-ml-email">
-                <label for="ml-email">Email address</label>
-                <input id="ml-email" name="ml-email" type="email" autocomplete="email" inputmode="email" required />
-                <p class="err-msg">Please enter a valid email address.</p>
-              </div>
-              <button class="btn btn-red" type="submit">Join the Mailing List</button>
-            </form>
-          </div></div>
-          <div class="form-note" id="ml-sent-note" role="status" style="margin-top:16px">
-            <p><strong>Your email app should now be open</strong> with your signup ready to go — just press send there and we'll add you to the list. Didn't open? Email us directly at <a href="mailto:info@baycitycast.com">info@baycitycast.com</a> and ask to join the mailing list.</p>
-          </div>
         </section>
 
         <section aria-labelledby="support-teaser-title">
@@ -928,42 +902,6 @@
             this.closest(".field").classList.remove("invalid");
           });
         });
-
-        /* ---------- Mailing list form -> pre-filled email ---------- */
-        var mlForm = document.getElementById("ml-form");
-        if (mlForm) {
-          mlForm.addEventListener("submit", function (e) {
-            e.preventDefault();
-            var mlName = document.getElementById("ml-name").value.trim();
-            var mlEmail = document.getElementById("ml-email").value.trim();
-
-            var mlOk = true;
-            mlOk = setInvalid("f-ml-name", !mlName) && mlOk;
-            mlOk = setInvalid("f-ml-email", !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mlEmail)) && mlOk;
-            if (!mlOk) {
-              var mlBad = mlForm.querySelector(".field.invalid input");
-              if (mlBad) mlBad.focus();
-              return;
-            }
-
-            var mlBody = [
-              "Please add me to the CAST mailing list.",
-              "",
-              "Name: " + mlName,
-              "Email: " + mlEmail
-            ].join("\n");
-            var mlHref = "mailto:info@baycitycast.com"
-              + "?subject=" + encodeURIComponent("Join the CAST mailing list")
-              + "&body=" + encodeURIComponent(mlBody);
-            document.getElementById("ml-sent-note").classList.add("show");
-            window.location.href = mlHref;
-          });
-          ["ml-name", "ml-email"].forEach(function (id) {
-            document.getElementById(id).addEventListener("input", function () {
-              this.closest(".field").classList.remove("invalid");
-            });
-          });
-        }
 
         /* ---------- Refresh: button + pull-to-refresh fallback ---------- */
         function doRefresh() {
