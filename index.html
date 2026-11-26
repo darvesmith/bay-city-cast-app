@@ -125,7 +125,7 @@
       }
       nav.tabbar .tabs {
         max-width: 680px; margin: 0 auto;
-        display: grid; grid-template-columns: repeat(6, 1fr);
+        display: grid; grid-template-columns: repeat(5, 1fr);
       }
       /* The 18px bottom padding lines the pill up with Netlify's injected
          badge: the badge sits 18px up from the bottom of the screen and is
@@ -137,22 +137,21 @@
         display: flex; align-items: flex-end; justify-content: center; gap: 10px;
         padding: 0 12px 18px;
       }
-      /* Pill button styled to match the "Powered by Netlify" badge that
-         Netlify injects at the bottom right of the live site. The badge is
-         37px tall, so the pill gets that exact fixed height (border-box)
-         rather than padding-derived height, which rendered ~41px. */
+      /* Pill buttons in the 2027 theme colors: gold for the website,
+         dark red for Chat with Encore. 37px fixed height so the two
+         pills share a baseline and a height. */
       .site-pill {
         display: inline-flex; align-items: center; gap: 8px;
         height: 37px; line-height: 1;
-        background: #0d1b26; color: #ffffff;
+        background: var(--gold-bright); color: #2c2115;
         font-weight: 600; font-size: 0.95rem; letter-spacing: 0.01em;
         text-decoration: none;
         padding: 0 18px; border-radius: 999px;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+        box-shadow: 0 4px 14px rgba(84, 58, 10, 0.28);
         white-space: nowrap;
       }
-      .site-pill:hover { background: #16293a; }
-      .site-pill svg { width: 17px; height: 17px; flex: 0 0 auto; color: var(--gold-bright); }
+      .site-pill:hover { background: var(--gold); }
+      .site-pill svg { width: 17px; height: 17px; flex: 0 0 auto; color: #2c2115; }
       .site-pill:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
       /* Chat with Encore pill: sits in the tab-bar spacer beside the
          BayCityCAST.com pill, same 37px height. The tab script picks it
@@ -161,15 +160,15 @@
       nav.tabbar button.chat-pill {
         min-height: 0; height: 37px; flex: 0 0 auto;
         display: inline-flex; flex-direction: row; align-items: center; gap: 8px;
-        background: #0d1b26; color: #ffffff;
+        background: var(--red); color: var(--red-ink);
         font-size: 0.95rem; font-weight: 600; line-height: 1; letter-spacing: 0.01em;
         padding: 0 14px; border-radius: 999px;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+        box-shadow: 0 4px 14px rgba(84, 58, 10, 0.28);
         white-space: nowrap; cursor: pointer;
       }
-      nav.tabbar button.chat-pill:hover { background: #16293a; }
+      nav.tabbar button.chat-pill:hover { background: var(--red-dark); }
       nav.tabbar button.chat-pill svg { width: 17px; height: 17px; flex: 0 0 auto; color: var(--gold-bright); }
-      nav.tabbar button.chat-pill[aria-selected="true"] { background: var(--red); color: #ffffff; }
+      nav.tabbar button.chat-pill[aria-selected="true"] { background: var(--red-dark); color: #ffffff; }
       nav.tabbar button.chat-pill[aria-selected="true"] svg { color: #ffffff; }
       @media (max-width: 400px) {
         .site-pill, nav.tabbar button.chat-pill { font-size: 0.85rem; padding: 0 12px; }
@@ -424,13 +423,6 @@
             <li>
               <span class="dot" aria-hidden="true"></span>
               <div>
-                <h3>Thank you — A Christmas Carol has closed</h3>
-                <p>Our final performance was Saturday, November 21. Thank you to everyone who came — and to our cast, crew, and volunteers.</p>
-              </div>
-            </li>
-            <li>
-              <span class="dot" aria-hidden="true"></span>
-              <div>
                 <h3>The 2027 season is revealed December 1</h3>
                 <p>Join us at the Season Premiere, Tuesday, December 1, 5:30–7:00 p.m. at the theatre, when next season's shows are announced.</p>
               </div>
@@ -483,9 +475,6 @@
             <li><a href="https://www.facebook.com/baycitycast1" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-7h2.4l.4-3h-2.8V9.1c0-.9.3-1.5 1.6-1.5h1.3V4.9c-.3 0-1.1-.1-2.1-.1-2.1 0-3.6 1.3-3.6 3.7V11H7.3v3h2.4v7h3.8z"/></svg>
               <span>CAST on Facebook<span class="sub">Show photos, announcements, and event news</span></span></a></li>
-            <li><a href="https://www.instagram.com/bay.city.cast/" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="0.7" fill="currentColor" stroke="none"/></svg>
-              <span>@bay.city.cast on Instagram<span class="sub">Behind-the-scenes and show highlights</span></span></a></li>
           </ul>
         </section>
       </main>
@@ -554,30 +543,6 @@
           </div></div>
         </section>
 
-        <section aria-labelledby="advertise-title">
-          <div class="section-head"><h2 id="advertise-title">Advertise in the CAST Playbills</h2><div class="rule" aria-hidden="true"></div></div>
-          <div class="card"><div class="pad">
-            <p>Every audience member gets a playbill — and takes it home. Put your business in front of Bay City and Matagorda County audiences at every performance.</p>
-            <ul class="support-ways">
-              <li>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4a2 2 0 0 0-2-2H6.5A2.5 2.5 0 0 0 4 4.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <p><strong>In every playbill.</strong> CAST prints a playbill for each production — A Christmas Carol's runs 16 pages — and audiences read them before the show, at intermission, and again at home.</p>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M15.5 4.1a3.5 3.5 0 0 1 0 6.8" stroke-linecap="round"/></svg>
-                <p><strong>A local audience.</strong> Our intimate 99-seat house fills with neighbours, families, and patrons from across Matagorda County — the same people who shop and dine locally.</p>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <p><strong>Plan ahead.</strong> Playbills go to the printer about a week before opening night, so get in touch early to reserve your spot for the next production.</p>
-              </li>
-            </ul>
-            <p>Ad sizes, current rates, and deadlines vary by production — email us and we'll send the details for the next playbill.</p>
-            <div class="btn-row">
-              <a class="btn btn-red" href="mailto:info@baycitycast.com?subject=Advertise%20in%20the%20CAST%20Playbills">Ask About Playbill Ads</a>
-            </div>
-          </div></div>
-        </section>
 
         <section aria-labelledby="sponsor-title">
           <div class="section-head"><h2 id="sponsor-title">How to Sponsor a Show</h2><div class="rule" aria-hidden="true"></div></div>
@@ -702,22 +667,6 @@
           </div></div>
         </section>
 
-        <section aria-labelledby="prices-title">
-          <div class="section-head"><h2 id="prices-title">Ticket Prices</h2><div class="rule" aria-hidden="true"></div></div>
-          <div class="card"><div class="pad">
-            <table class="price-table">
-              <thead><tr><th scope="col">Show type</th><th scope="col" class="amt">Adult</th><th scope="col" class="amt">Student</th></tr></thead>
-              <tbody>
-                <tr><td>Standard play</td><td class="amt">$20</td><td class="amt">$7</td></tr>
-                <tr><td>Musical / larger production</td><td class="amt">$25</td><td class="amt">$10</td></tr>
-              </tbody>
-            </table>
-            <p style="margin-top:12px; font-size:0.95rem; color:var(--ink-soft)">Prices for the current show are listed on BookTix when you buy.</p>
-            <div class="btn-row">
-              <a class="btn btn-red" href="https://casttx.booktix.com" target="_blank" rel="noopener">Buy Tickets on BookTix</a>
-            </div>
-          </div></div>
-        </section>
 
         <section aria-labelledby="contact-title">
           <div class="section-head"><h2 id="contact-title">Contact</h2><div class="rule" aria-hidden="true"></div></div>
@@ -734,9 +683,6 @@
             <li><a href="https://www.facebook.com/baycitycast1" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-7h2.4l.4-3h-2.8V9.1c0-.9.3-1.5 1.6-1.5h1.3V4.9c-.3 0-1.1-.1-2.1-.1-2.1 0-3.6 1.3-3.6 3.7V11H7.3v3h2.4v7h3.8z"/></svg>
               <span>CAST on Facebook<span class="sub">Follow us for show news and photos</span></span></a></li>
-            <li><a href="https://www.instagram.com/bay.city.cast/" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="0.7" fill="currentColor" stroke="none"/></svg>
-              <span>@bay.city.cast on Instagram<span class="sub">Follow us behind the scenes</span></span></a></li>
           </ul>
           <div class="install-tip"><strong>Keep CAST on your home screen:</strong> on iPhone, tap Share, then “Add to Home Screen”; on Android, tap the ⋮ menu, then “Add to Home screen.” The app icon will sit right alongside your other apps.</div>
         </section>
@@ -784,9 +730,6 @@
         <button type="button" role="tab" data-tab="auditions" aria-selected="false" aria-controls="view-auditions">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8" stroke-linecap="round"/></svg>
           Auditions</button>
-        <button type="button" role="tab" data-tab="seats" aria-selected="false" aria-controls="view-seats">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2.5 2.5 0 0 0 0 5v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2.5 2.5 0 0 0 0-5z"/><path d="M13 5v2M13 11v2M13 17v2" stroke-linecap="round"/></svg>
-          My Seats</button>
         <button type="button" role="tab" data-tab="visit" aria-selected="false" aria-controls="view-visit">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
           Visit</button>
